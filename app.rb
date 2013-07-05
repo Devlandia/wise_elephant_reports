@@ -1,7 +1,7 @@
 require "rubygems"
 require "sinatra/base"
 
-class MyApp < Sinatra::Base
+class App < Sinatra::Base
 
   get '/' do
     'Hello, nginx and unicorn!'
