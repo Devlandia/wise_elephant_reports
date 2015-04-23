@@ -1,0 +1,29 @@
+# https://github.com/bbatsov/rubocop/blob/master/config/enabled.yml
+LineLength:
+    Max: 140
+AndOr:
+  Enabled: false
+Documentation:
+  Enabled: false
+DefWithParentheses:
+  Enabled: false
+MethodDefParentheses:
+  Enabled: false
+DotPosition:
+  Enabled: false
+AllCops:
+  Include:
+    - Rakefile
+    - config.ru
+  Exclude:
+    - bin/**/*
+    - db/**/*
+    - docs/**/*
+    - spec/**/*
+    - config/**/*
+    - script/**/*
+    - vendor/**/*
+    - features/**/*
+    - unicorn.rb
+    - !ruby/regexp /old_and_unused\.rb$/
+  RunRailsCops: true
