@@ -1,0 +1,24 @@
+default: &default
+  adapter: sqlite3
+  pool: 5
+  timeout: 5000
+
+development:
+  adapter   : mysql
+  encoding  : utf8
+  database  : my_db
+  username  : my_user
+  password  : my_password
+  host      : my_host
+
+test:
+  <<: *default
+  database: db/test.sqlite3
+
+staging:
+  <<: *default
+  database: db/staging.sqlite3
+
+production:
+  <<: *default
+  database: db/production.sqlite3
