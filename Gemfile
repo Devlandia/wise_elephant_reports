@@ -6,4 +6,7 @@ gem 'shotgun'
 gem 'rspec'
 gem 'rack-test'
 
-gem 'capistrano'
+gem 'sinatra-activerecord'
+gem 'sqlite3'
+gem 'mysql'
+gem 'rake'
