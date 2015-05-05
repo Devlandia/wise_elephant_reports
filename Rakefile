@@ -10,6 +10,6 @@
 
 APPLICATION_PATH  = File.expand_path(File.dirname(__FILE__))
 
-require "#{APPLICATION_PATH}/lib/tasks/mysql_connection_helper.rb"
+require "#{APPLICATION_PATH}/app/helpers/mysql_connection_helper.rb"
 
 Dir.glob('./lib/tasks/*.rake').each { |r| import r }

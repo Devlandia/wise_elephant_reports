@@ -8,6 +8,7 @@ namespace :db do
     registers_found = 0
     registers_done  = 0
     log_message     = ''
+    current_item    = nil
 
     begin
       # Define today if is informed as param
@@ -24,6 +25,7 @@ namespace :db do
 
       registers_found = results.size
       results.each do |item|
+        current_item  = item
         query = assemble_hits_insert_query(item)
         reports_client.query query
 
@@ -40,9 +42,12 @@ namespace :db do
     rescue => e
       puts "\n"
       puts "====> FAIL TO LOG"
+      puts "Date: #{today}"
+      puts "Table Name: #{table_name}"
+      puts "Item: #{current_item}"
       puts e.message
       puts '#' * 50
-      puts e
+      p e
       puts '#' * 50
     end
   end
@@ -53,7 +58,7 @@ def assemble_hits_insert_query(item)
   INSERT INTO reports.hits_by_day
     (created_at, tracker_name, destination_name, hits)
   VALUES
-    ('#{item[:created_at].strftime('%Y-%m-%d')}', '#{item[:tracker_name]}', '#{item[:destination_name]}', #{item[:hits]})
+    ("#{item[:created_at].strftime("%Y-%m-%d")}", "#{item[:tracker_name]}", "#{item[:destination_name]}", #{item[:hits]})
 EOF
 end
 
