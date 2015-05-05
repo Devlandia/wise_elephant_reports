@@ -8,6 +8,7 @@ namespace :db do
     registers_found = 0
     registers_done  = 0
     log_message     = ''
+    current_item    = nil
 
     begin
       # Define today if is informed as param
@@ -24,7 +25,8 @@ namespace :db do
 
       registers_found = results.size
       results.each do |item|
-        query = assemble_orders_insert_query(item)
+        current_item  = item
+        query         = assemble_orders_insert_query(item)
         reports_client.query query
 
         registers_done += 1
@@ -40,9 +42,12 @@ namespace :db do
     rescue => e
       puts "\n"
       puts "====> FAIL TO LOG"
+      puts "Date: #{today}"
+      puts "Table Name: #{table_name}"
+      puts "Item: #{current_item}"
       puts e.message
       puts '#' * 50
-      puts e
+      p e
       puts '#' * 50
     end
   end
@@ -69,16 +74,16 @@ INSERT INTO reports.orders_by_day (
 VALUES (
   #{item[:destination_id]},
   #{item[:tracker_id]},
-  '#{item[:order_type]}',
-  '#{item[:created_at].strftime('%Y-%m-%d')}',
-  '#{item[:tracker_name]}',
-  '#{item[:tracker_url]}',
-  '#{item[:destination_name]}',
-  '#{item[:destination_url]}',
-  '#{item[:platform_name]}',
-  '#{item[:platform_url]}',
-  '#{item[:source_name]}',
-  '#{item[:source_display_name]}',
+  "#{item[:order_type]}",
+  "#{item[:created_at].strftime('%Y-%m-%d')}",
+  "#{item[:tracker_name]}",
+  "#{item[:tracker_url]}",
+  "#{item[:destination_name]}",
+  "#{item[:destination_url]}",
+  "#{item[:platform_name]}",
+  "#{item[:platform_url]}",
+  "#{item[:source_name]}",
+  "#{item[:source_display_name]}",
   #{item[:number_of_orders]},
   #{item[:value_of_orders]}
 );

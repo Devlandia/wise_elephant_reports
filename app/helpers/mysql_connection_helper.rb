@@ -7,6 +7,7 @@ module Report
   module MysqlConnection
     attr_accessor :reports_client
     attr_accessor :wiseleph_hattan_client
+    attr_accessor :tusks_client
 
     def reports_client
       return @reports_client unless @reports_client.nil?
@@ -22,6 +23,14 @@ module Report
       @wiseleph_hattan_client = stablish_wiseleph_hattan_connection
 
       @wiseleph_hattan_client
+    end
+
+    def tusks_client
+      return @tusks_client unless @tusks_client.nil?
+
+      @tusks_client = stablish_tusks_connection
+
+      @tusks_client
     end
 
     def env
@@ -43,6 +52,10 @@ module Report
 
     def stablish_wiseleph_hattan_connection
       stablish_connection config_file[env]['wiseleph_hattan']
+    end
+
+    def stablish_tusks_connection
+      stablish_connection config_file[env]['tusks']
     end
 
     def log_result(table_name, registers_found, registers_done, log_message)
