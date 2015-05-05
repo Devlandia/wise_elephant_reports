@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'sinatra'
 
-require File.expand_path '../app.rb', __FILE__
+APPLICATION_PATH  = File.expand_path(File.dirname(__FILE__))
+
+require "#{APPLICATION_PATH}/app.rb"
 
 run App

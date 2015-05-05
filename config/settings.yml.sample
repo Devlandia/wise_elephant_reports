@@ -1,0 +1,43 @@
+development:
+  tusks:
+    encoding  : utf8
+    host      : your_host
+    username  : your_username
+    password  : your_password
+    database  : your_database
+
+  wiseleph_hattan:
+    encoding  : utf8
+    host      : your_host
+    username  : your_username
+    password  : your_password
+    database  : your_database
+
+  reports:
+    encoding  : utf8
+    host      : your_host
+    username  : your_username
+    password  : your_password
+    database  : your_database
+
+production:
+  tusks:
+    encoding  : utf8
+    host      : your_host
+    username  : your_username
+    password  : your_password
+    database  : your_database
+
+  wiseleph_hattan:
+    encoding  : utf8
+    host      : your_host
+    username  : your_username
+    password  : your_password
+    database  : your_database
+
+  reports:
+    encoding  : utf8
+    host      : your_host
+    username  : your_username
+    password  : your_password
+    database  : your_database
