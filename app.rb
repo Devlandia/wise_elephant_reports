@@ -12,10 +12,25 @@ class App < Sinatra::Base
   # Frontent
   get '/dashboard' do
     @title = 'All Traffic'
+    @url   = 'source'
     @date_range = 'Apr 21, 2015 to Apr 22, 2015'
 
     begin
-      @data = OrdersByDay.dashboard( '2015-04-25' )
+      @data = OrdersByDay.dashboard( '2015-04-24' )
+    rescue => e
+      @error = e.message
+    end
+
+    erb :dashboard
+  end
+
+  get '/source/:name/date/:date' do
+    @title = params['name']
+    @date_range = params['date']
+    @url   = 'tracker'
+
+    begin
+      @data = OrdersByDay.from_source(params['name'], params['date'])
     rescue => e
       @error = e.message
     end
@@ -24,7 +39,6 @@ class App < Sinatra::Base
   end
 
   # API
-
   get '/health' do
     "I'm OK"
   end

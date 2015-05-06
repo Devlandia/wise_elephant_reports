@@ -5,7 +5,7 @@
 </div>
 
 <div class="page-header">
-  <h1><%= @title %> <small> - <%= @date_range %></small></h1>
+  <h1><%= @title %> <small style='background:red'> - <%= @date_range %></small></h1>
 </div>
 
 <div class="row">
@@ -34,7 +34,7 @@
 
         <% @data.each do |info| %>
           <tr>
-            <td><%= info[0] %></td>
+            <td><a href="/<%= @url %>/<%= info[0] %>/date/2015-04-21"><%= info[0] %></a></td>
             <td><%= info[1][:hits] %></td>
             <td><%= info[1][:conversions] %></td>
             <td><%= info[1][:upsells] %></td>
@@ -46,7 +46,7 @@
 
           <%
             @total[:hits]            = @total[:hits] + info[1][:hits]
-            @total[:conversions]     = @total[:conversions] + info[1][:conversions]
+            # @total[:conversions]     = @total[:conversions] + info[1][:conversions]
             @total[:upsells]         = @total[:upsells] + info[1][:upsells]
             @total[:sales]           = @total[:sales] + info[1][:sales]
             @total[:total_upsells]   = @total[:total_upsells] + info[1][:total_upsells]
@@ -57,12 +57,12 @@
         <tr class="success">
           <td>Total</td>
           <td><%= @total[:hits] %></td>
-          <td><%= @total[:conversions] %></td>
+          <td class='danger'><%= @total[:conversions] %></td>
           <td><%= @total[:upsells] %></td>
           <td><%= @total[:sales] %></td>
           <td><%= @total[:total_upsells] %></td>
           <td><%= @total[:total_sales] %></td>
-          <td><%= @total[:avg_order_value] %></td>
+          <td class='danger'><%= @total[:avg_order_value] %></td>
         </tr>
       </tbody>
     </table>
