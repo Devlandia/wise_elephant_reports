@@ -35,75 +35,17 @@
     </nav>
 
     <div class="container" role="main">
+      <%if @error then %>
+        <div class="alert alert-error"><%= @error %></div>
+      <% end %>
 
-      <!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="jumbotron">
-        <h1>Title</h1>
-        <p>Any text you wanna insert here.</p>
-      </div>
-
-      <div class="page-header">
-        <h1>All Traffic <small> - Apr 21, 2015 to Apr 22, 2015</small></h1>
-      </div>
-
-      <div class="row">
-        <div class="col-md-12">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Source</th>
-                <th># Hits</th>
-                <th># Conversions</th>
-                <th># Upsells</th>
-                <th>$ Sales</th>
-                <th>$ Upsells Sales</th>
-                <th>$ Total Sales</th>
-                <th>Avg. Order Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Paid</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Organic</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-              </tr>
-              <tr class="success">
-                <td>Total</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-                <td>1</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <%= yield %>
     </div>
 
-
-
-
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script src="/vendor/jquery-1.9.1.min.js"></script>
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="/vendor/jquery-1.9.1.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
   </body>
 </html>

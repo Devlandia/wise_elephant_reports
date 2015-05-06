@@ -11,6 +11,15 @@ class App < Sinatra::Base
 
   # Frontent
   get '/dashboard' do
+    @title = 'All Traffic'
+    @date_range = 'Apr 21, 2015 to Apr 22, 2015'
+
+    begin
+      @data = OrdersByDay.dashboard( '2015-04-25' )
+    rescue => e
+      @error = e.message
+    end
+
     erb :dashboard
   end
 
