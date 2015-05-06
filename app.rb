@@ -1,9 +1,20 @@
 # encoding: utf-8
 
 require "#{APPLICATION_PATH}/bootstrap.rb"
-
+require 'sinatra/reloader'
 class App < Sinatra::Base
   register Sinatra::ActiveRecordExtension
+
+  configure :development do
+    register Sinatra::Reloader
+  end
+
+  # Frontent
+  get '/dashboard' do
+    erb :dashboard
+  end
+
+  # API
 
   get '/health' do
     "I'm OK"
