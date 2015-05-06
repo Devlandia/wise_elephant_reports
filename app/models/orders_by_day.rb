@@ -114,7 +114,7 @@ class OrdersByDay < ActiveRecord::Base
 
   def self.calculate_avgs(item, hits)
     item[:hits]             = hits
-    item[:conversions]      = "#{100 * item[:sales] / item[:hits]}%"
+    item[:conversions]      = 100 * item[:sales] / item[:hits]
     item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
 
     item

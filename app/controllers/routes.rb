@@ -3,12 +3,17 @@
 require "#{APPLICATION_PATH}/bootstrap.rb"
 require 'sinatra/reloader'
 
-class App < Sinatra::Base
+class Routes < Sinatra::Base
   register Sinatra::ActiveRecordExtension
 
   configure :development do
     register Sinatra::Reloader
   end
+
+  set :root, APPLICATION_PATH
+  set :views, "#{APPLICATION_PATH}/app/views"
+
+  include ActionView::Helpers::NumberHelper
 
   # Frontent
   get '/dashboard/:date' do

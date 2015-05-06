@@ -30,39 +30,40 @@
                      :sales => 0,
                      :total_upsells => 0,
                      :total_sales => 0,
-                     :avg_order_value => 0} %>
+                     :avg_order_value => 0}; count = 0 %>
 
         <% @data.each do |info| %>
           <tr>
             <td><a href="/<%= @url %>/<%= info[0] %>/date/2015-04-21"><%= info[0] %></a></td>
             <td><%= info[1][:hits] %></td>
-            <td><%= info[1][:conversions] %></td>
+            <td><%= number_to_percentage info[1][:conversions], precision: 0 %></td>
             <td><%= info[1][:upsells] %></td>
             <td><%= info[1][:sales] %></td>
-            <td><%= info[1][:total_upsells] %></td>
-            <td><%= info[1][:total_sales] %></td>
-            <td><%= info[1][:avg_order_value] %></td>
+            <td><%= number_to_currency info[1][:total_upsells] %></td>
+            <td><%= number_to_currency info[1][:total_sales] %></td>
+            <td><%= number_with_precision info[1][:avg_order_value], precision: 2 %></td>
           </tr>
 
           <%
-            @total[:hits]            = @total[:hits] + info[1][:hits]
-            # @total[:conversions]     = @total[:conversions] + info[1][:conversions]
-            @total[:upsells]         = @total[:upsells] + info[1][:upsells]
-            @total[:sales]           = @total[:sales] + info[1][:sales]
-            @total[:total_upsells]   = @total[:total_upsells] + info[1][:total_upsells]
-            @total[:total_sales]     = @total[:total_sales] + info[1][:total_sales]
-            @total[:avg_order_value] = @total[:avg_order_value] + info[1][:avg_order_value]
+            @total[:hits]            += info[1][:hits]
+            @total[:conversions]     += info[1][:conversions]
+            @total[:upsells]         += info[1][:upsells]
+            @total[:sales]           += info[1][:sales]
+            @total[:total_upsells]   += info[1][:total_upsells]
+            @total[:total_sales]     += info[1][:total_sales]
+            @total[:avg_order_value] += info[1][:avg_order_value]
+            count += 1
           %>
         <% end %>
         <tr class="success">
           <td>Total</td>
           <td><%= @total[:hits] %></td>
-          <td class='danger'><%= @total[:conversions] %></td>
+          <td class='danger'><%= number_to_percentage (@total[:conversions] / count), precision: 0 %></td>
           <td><%= @total[:upsells] %></td>
           <td><%= @total[:sales] %></td>
-          <td><%= @total[:total_upsells] %></td>
-          <td><%= @total[:total_sales] %></td>
-          <td class='danger'><%= @total[:avg_order_value] %></td>
+          <td><%= number_to_currency @total[:total_upsells] %></td>
+          <td><%= number_to_currency @total[:total_sales] %></td>
+          <td class='danger'><%= number_with_precision (@total[:avg_order_value] / count), precision: 2 %></td>
         </tr>
       </tbody>
     </table>

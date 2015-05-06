@@ -3,6 +3,6 @@ require 'sinatra'
 
 APPLICATION_PATH  = File.expand_path(File.dirname(__FILE__))
 
-require "#{APPLICATION_PATH}/app.rb"
+require "#{APPLICATION_PATH}/app/controllers/routes.rb"
 
-run App
+run Routes
