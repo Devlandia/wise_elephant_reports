@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'sinatra/base'
 require 'sinatra/activerecord'
+require 'action_view'
 
 set :database_file, "#{APPLICATION_PATH}/config/database.yml"
 

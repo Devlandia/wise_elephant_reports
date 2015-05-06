@@ -13,6 +13,8 @@ class Routes < Sinatra::Base
   set :root, APPLICATION_PATH
   set :views, "#{APPLICATION_PATH}/app/views"
 
+  include ActionView::Helpers::NumberHelper
+
   # Frontent
   get '/dashboard/:date' do
     @title  = 'All Traffic'
