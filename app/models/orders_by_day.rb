@@ -1,13 +1,15 @@
 class OrdersByDay < ActiveRecord::Base
   self.table_name = 'orders_by_day'
 
+  has_many :hits_by_day, class_name: 'HitsByDay', foreign_key: [:tracker_name, :destination_name, :created_at]
+
   def self.dashboard(date)
     # Group by source type to informed day
     items = OrdersByDay .select('source_name, source_display_name, order_type, created_at, sum(number_of_orders) AS number_of_orders, sum(value_of_orders) AS value_of_orders')
                         .where(created_at: date)
                         .group('source_name, source_display_name, order_type, created_at')
 
-    assemble_sources_hash items
+    assemble_dashboard_hash items
   end
 
   def self.from_source(source_display_name, date)
@@ -32,7 +34,7 @@ class OrdersByDay < ActiveRecord::Base
     response.to_json
   end
 
-  def self.assemble_sources_hash(items)
+  def self.assemble_dashboard_hash(items)
     response  = {}
     split     = {}
     template  = { hits: 0, conversions: 0, avg_order_value: 0 }
@@ -43,10 +45,25 @@ class OrdersByDay < ActiveRecord::Base
     # Split items into sources
     items.each { |item| split[item.source_display_name] << item }
 
+    # Mount hits hash
+    hits_hash = HitsByDay.dashboard_hash items.first.created_at
+
     # Sumarize for upsells and sales
-    split.each { |key, items| response[key] = template.merge(sumarize(items)) }
+    split.each do |key, items|
+      response[key] = template.merge(sumarize(items))
+      response[key] = calculate_avgs(response[key], hits_hash[key]) if hits_hash.has_key?(key)
+    end
 
     response
+  end
+
+  def self.calculate_avgs(item, hits)
+    item[:hits]             = hits
+    #conversions             = 100 * item[:sales] / item[:hits]
+    #item[:conversions]      = "#{conversions}%"
+    item[:conversions]      = "#{100 * item[:sales] / item[:hits]}%"
+    item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
+    item
   end
 
   def self.assemble_from_source_hash(items)
