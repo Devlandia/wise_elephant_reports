@@ -5,7 +5,7 @@
 </div>
 
 <div class="page-header">
-  <h1><%= @title %> <small style='background:red'> - <%= @date_range %></small></h1>
+  <h1><%= @title %> <small><%= @date.inspect %></small></h1>
 </div>
 
 <div class="row">
@@ -17,10 +17,10 @@
           <th># Hits</th>
           <th># Conversions</th>
           <th># Upsells</th>
-          <th>$ Sales</th>
+          <th># Sales</th>
           <th>$ Upsells Sales</th>
           <th>$ Total Sales</th>
-          <th>Avg. Order Value</th>
+          <th># Avg. Order Value</th>
         </tr>
       </thead>
       <tbody>

@@ -46,7 +46,7 @@ class OrdersByDay < ActiveRecord::Base
     items.each { |item| split[item.source_display_name] << item }
 
     # Mount hits hash
-    hits_hash = HitsByDay.dashboard_hash items.first.created_at
+    hits_hash = HitsByDay.hash_by_day items.first.created_at
 
     # Sumarize for upsells and sales
     split.each do |key, items|
@@ -55,15 +55,6 @@ class OrdersByDay < ActiveRecord::Base
     end
 
     response
-  end
-
-  def self.calculate_avgs(item, hits)
-    item[:hits]             = hits
-    #conversions             = 100 * item[:sales] / item[:hits]
-    #item[:conversions]      = "#{conversions}%"
-    item[:conversions]      = "#{100 * item[:sales] / item[:hits]}%"
-    item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
-    item
   end
 
   def self.assemble_from_source_hash(items)
@@ -77,8 +68,14 @@ class OrdersByDay < ActiveRecord::Base
     # Split items into sources
     items.each { |item| split[item.tracker_name] << item }
 
+    # Mount hits hash
+    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name
+
     # Sumarize for upsells and sales
-    split.each { |key, items| response[key] = template.merge(sumarize(items)) }
+    split.each do |key, items|
+      response[key] = template.merge(sumarize(items))
+      response[key] = calculate_avgs(response[key], hits_hash[key]) if hits_hash.has_key?(key)
+    end
 
     response
   end
@@ -113,5 +110,13 @@ class OrdersByDay < ActiveRecord::Base
     end
 
     response
+  end
+
+  def self.calculate_avgs(item, hits)
+    item[:hits]             = hits
+    item[:conversions]      = "#{100 * item[:sales] / item[:hits]}%"
+    item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
+
+    item
   end
 end

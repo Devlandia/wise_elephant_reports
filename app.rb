@@ -2,6 +2,7 @@
 
 require "#{APPLICATION_PATH}/bootstrap.rb"
 require 'sinatra/reloader'
+
 class App < Sinatra::Base
   register Sinatra::ActiveRecordExtension
 
@@ -10,13 +11,13 @@ class App < Sinatra::Base
   end
 
   # Frontent
-  get '/dashboard' do
-    @title = 'All Traffic'
-    @url   = 'source'
-    @date_range = 'Apr 21, 2015 to Apr 22, 2015'
+  get '/dashboard/:date' do
+    @title  = 'All Traffic'
+    @url    = 'source'
+    @date   = Date.parse params[:date]
 
     begin
-      @data = OrdersByDay.dashboard( '2015-04-24' )
+      @data = OrdersByDay.dashboard(params['date'])
     rescue => e
       @error = e.message
     end
@@ -25,9 +26,9 @@ class App < Sinatra::Base
   end
 
   get '/source/:name/date/:date' do
-    @title = params['name']
-    @date_range = params['date']
-    @url   = 'tracker'
+    @title  = params['name']
+    @date   = Date.parse params[:date]
+    @url    = 'tracker'
 
     begin
       @data = OrdersByDay.from_source(params['name'], params['date'])
