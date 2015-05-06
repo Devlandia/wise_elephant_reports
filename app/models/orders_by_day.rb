@@ -19,7 +19,13 @@ class OrdersByDay < ActiveRecord::Base
     assemble_from_source_hash items
   end
 
-  def self.tracker(params = {})
+  def self.from_tracker(tracker_name, date)
+    params    = { 'tracker_name' => tracker_name, 'created_at' => date }
+    items     = filter params
+
+    assemble_from_tracker_hash items
+
+=begin
     items     = filter params
     response  = { tracker_name: '', tracker_url: '', hits: 0, convertions: 0, upsells: 0, total_upsells: 0, sales: 0, total_sales: 0 }
 
@@ -32,6 +38,7 @@ class OrdersByDay < ActiveRecord::Base
     response.merge! sumarize(items)
 
     response.to_json
+=end
   end
 
   def self.assemble_dashboard_hash(items)
@@ -80,6 +87,29 @@ class OrdersByDay < ActiveRecord::Base
     response
   end
 
+  def self.assemble_from_tracker_hash(items)
+    response  = {}
+    split     = {}
+    template  = { hits: 0, conversions: 0, avg_order_value: 0 }
+
+    # Build a hash with default template to each source]
+    items.each { |item| split[item.destination_name] = [] }
+
+    # Split items into sources
+    items.each { |item| split[item.destination_name] << item }
+
+    # Mount hits hash
+    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name, items.first.tracker_name
+
+    # Sumarize for upsells and sales
+    split.each do |key, items|
+      response[key] = template.merge(sumarize(items))
+      response[key] = calculate_avgs(response[key], hits_hash[key]) if hits_hash.has_key?(key)
+    end
+
+    response
+  end
+
   def self.filter(params = {})
     where(assemble_filters(params))
   end
@@ -92,6 +122,7 @@ class OrdersByDay < ActiveRecord::Base
     filters[:order_type]          = params['order_type']                            if params.key? 'order_type'
     filters[:created_at]          = Date.strptime(params['created_at'], '%Y-%m-%d') if params.key? 'created_at'
     filters[:source_display_name] = params['source_display_name'] if params.key? 'source_display_name'
+    filters[:tracker_name]        = params['tracker_name']        if params.key? 'tracker_name'
 
     filters
   end

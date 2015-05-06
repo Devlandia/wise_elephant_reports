@@ -18,8 +18,8 @@ class Routes < Sinatra::Base
   # Frontent
   get '/dashboard/:date' do
     @title  = 'All Traffic'
-    @url    = 'source'
     @date   = Date.parse params[:date]
+    @url    = 'source'
 
     begin
       @data = OrdersByDay.dashboard(params['date'])
@@ -31,12 +31,26 @@ class Routes < Sinatra::Base
   end
 
   get '/source/:name/date/:date' do
-    @title  = params['name']
+    @title  = "Source #{params['name']}"
     @date   = Date.parse params[:date]
     @url    = 'tracker'
 
     begin
       @data = OrdersByDay.from_source(params['name'], params['date'])
+    rescue => e
+      @error = e.message
+    end
+
+    erb :dashboard
+  end
+
+  get '/tracker/:name/date/:date' do
+    @title  = params['name']
+    @date   = Date.parse params[:date]
+    @url    = 'tracker'
+
+    begin
+      @data = OrdersByDay.from_tracker(params['name'], params['date'])
     rescue => e
       @error = e.message
     end
@@ -70,17 +84,11 @@ class Routes < Sinatra::Base
     end
   end
 
-  get '/orders' do
+  # Show all orders and upsells from a source to a date.
+  # localhost:8080/report/source/Social%20Media/date/2015-03-19
+  get '/report/tracker/:name/date/:date' do
     begin
-      { status: true, orders: OrdersByDay.filter(params) }.to_json
-    rescue => e
-      { status: false, message: e.message }.to_json
-    end
-  end
-
-  get '/report/tracker/:id/:created_at' do
-    begin
-      { status: true, data: OrdersByDay.tracker(params) }.to_json
+      { status: true, data: OrdersByDay.from_tracker(params['name'], params['date']) }.to_json
     rescue => e
       { status: false, message: e.message }.to_json
     end

@@ -38,7 +38,7 @@ namespace :db do
     end
 
     begin
-      log_result table_name, registers_found, registers_done, log_message
+      log_result today, table_name, registers_found, registers_done, log_message
     rescue => e
       puts "\n"
       puts "====> FAIL TO LOG"
