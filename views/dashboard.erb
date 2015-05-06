@@ -1,0 +1,70 @@
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron">
+  <h1>Title</h1>
+  <p>Any text you wanna insert here.</p>
+</div>
+
+<div class="page-header">
+  <h1><%= @title %> <small> - <%= @date_range %></small></h1>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th># Hits</th>
+          <th># Conversions</th>
+          <th># Upsells</th>
+          <th>$ Sales</th>
+          <th>$ Upsells Sales</th>
+          <th>$ Total Sales</th>
+          <th>Avg. Order Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @total = {:hits => 0,
+                     :conversions => 0,
+                     :upsells => 0,
+                     :sales => 0,
+                     :total_upsells => 0,
+                     :total_sales => 0,
+                     :avg_order_value => 0} %>
+
+        <% @data.each do |info| %>
+          <tr>
+            <td><%= info[0] %></td>
+            <td><%= info[1][:hits] %></td>
+            <td><%= info[1][:conversions] %></td>
+            <td><%= info[1][:upsells] %></td>
+            <td><%= info[1][:sales] %></td>
+            <td><%= info[1][:total_upsells] %></td>
+            <td><%= info[1][:total_sales] %></td>
+            <td><%= info[1][:avg_order_value] %></td>
+          </tr>
+
+          <%
+            @total[:hits]            = @total[:hits] + info[1][:hits]
+            @total[:conversions]     = @total[:conversions] + info[1][:conversions]
+            @total[:upsells]         = @total[:upsells] + info[1][:upsells]
+            @total[:sales]           = @total[:sales] + info[1][:sales]
+            @total[:total_upsells]   = @total[:total_upsells] + info[1][:total_upsells]
+            @total[:total_sales]     = @total[:total_sales] + info[1][:total_sales]
+            @total[:avg_order_value] = @total[:avg_order_value] + info[1][:avg_order_value]
+          %>
+        <% end %>
+        <tr class="success">
+          <td>Total</td>
+          <td><%= @total[:hits] %></td>
+          <td><%= @total[:conversions] %></td>
+          <td><%= @total[:upsells] %></td>
+          <td><%= @total[:sales] %></td>
+          <td><%= @total[:total_upsells] %></td>
+          <td><%= @total[:total_sales] %></td>
+          <td><%= @total[:avg_order_value] %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

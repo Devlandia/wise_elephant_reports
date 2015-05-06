@@ -1,9 +1,29 @@
 # encoding: utf-8
 
 require "#{APPLICATION_PATH}/bootstrap.rb"
-
+require 'sinatra/reloader'
 class App < Sinatra::Base
   register Sinatra::ActiveRecordExtension
+
+  configure :development do
+    register Sinatra::Reloader
+  end
+
+  # Frontent
+  get '/dashboard' do
+    @title = 'All Traffic'
+    @date_range = 'Apr 21, 2015 to Apr 22, 2015'
+
+    begin
+      @data = OrdersByDay.dashboard( '2015-04-25' )
+    rescue => e
+      @error = e.message
+    end
+
+    erb :dashboard
+  end
+
+  # API
 
   get '/health' do
     "I'm OK"
