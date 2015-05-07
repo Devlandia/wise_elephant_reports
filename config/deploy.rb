@@ -1,79 +1,105 @@
-set :application,               "Sinatra Saploe APP"
-set :repository,                "git@github.com:rodrigovdb/default-sinatra-app"
-set :scm,                        "git"
-set :user,                       "ubuntu"
-set :use_sudo,                   false
-set :deploy_to,                  "/home/ubuntu/sinatra/"
-set :normalize_asset_timestamps, false
+require 'mina/bundler'
+require 'mina/git'
+require 'mina/rvm'
+require 'mina/unicorn'        # https://github.com/scarfacedeb/mina-unicorn
+require 'mina/nginx'          # https://github.com/hbin/mina-nginx
 
-role :web, "ladodireito.com"                          # Your HTTP server, Apache/etc
-role :app, "ladodireito.com"                          # This may be the same as your `Web` server
+# About unicorn integration:
+# It's necessary config tmp/sockets and tmp/pids on shared_paths and
+# create_deploy_dirs.
+set :domain,        '104.130.124.233'
+#set :branch,        'master'
+set :branch,        'deploy'
+set :unicorn_env,   'production'
+set :application,   'reports'
+set :deploy_to,     "/var/www/#{application}"
+set :repository,    'git@github.com:Devlandia/wise_elephant_reports.git'
+set :user,          'devlandia'
+set :forward_agent, true
+set :port,          '22'
+set :shared_paths,  %w{ .env log tmp/sockets tmp/pids config/database.yml }
 
-set :unicorn_binary, "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247/bin/unicorn"
-set :unicorn_config, "#{current_path}/unicorn.rb"
-set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
-#set :unicorn_binary, "#{current_path}/bin/unicorn.sh"
+# My settings from mina extensions
+set :ruby_version,    '2.2.0'
+set :unicorn_config,  'config/unicorn.rb'
 
-before :deploy do
-#  directory_name = "#{deploy_to}shared/pids"
-#  Dir.mkdir(directory_name) unless File.exists?(directory_name)
-
-#  directory_name = "#{deploy_to}/shared/sockets"
-#  Dir.mkdir(directory_name) unless File.exists?(directory_name)
+task :environment do
+  invoke :"rvm:use[#{ruby_version}@default]"
 end
 
-after :deploy do
-  run "cd #{current_path} && ln -s #{deploy_to}/shared/sockets tmp/sockets"
-  #remote.restart_unicorn
+# This doesn't invoke rvm things. It's necessary to start process
+# when server doesn't have rvm already installed.
+task :setup_environment do
 end
 
-namespace :unicorn do
-  ### RVM Definitions
-  set :default_environment, {
-    'PATH'          => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247/bin:/home/ubuntu/.rvm/gems/ruby-2.0.0-p247@global/bin:/home/ubuntu/.rvm/rubies/ruby-2.0.0-p247/bin:/home/ubuntu/.rvm/bin:$PATH",
-    'RUBY_VERSION'  => 'ruby 2.0.0',
-    'GEM_HOME'      => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247",
-    'GEM_PATH'      => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247:/home/ubuntu/.rvm/gems/ruby-2.0.0-p247@global",
-    'BUNDLE_PATH'   => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247@global/gems/bundler-1.3.5",
-  }
+task setup: :setup_environment do
+  invoke :'create_deploy_dirs'
+  invoke :'install_dependencies'
+  invoke :'install_rvm'
+  invoke :'configure_nginx'
+end
 
-  desc "Start unicorn service"
-  task :start, :roles => :app, :except => { :no_release => true } do
-    #run "cd #{current_path} && #{try_sudo} #{unicorn_binary} -c #{unicorn_config} -E #{rails_env} -D"
-    run "cd #{current_path} && #{try_sudo} #{unicorn_binary} -c #{unicorn_config} -E production -D"
-  end
+desc "Deploys the current version to the server."
+task deploy: :environment do
+  deploy do
+    invoke :'git:clone'
+    invoke :'deploy:link_shared_paths'
+    invoke :'bundle:install'
+    invoke :'deploy:cleanup'
+    invoke :'nginx:restart'
 
-  desc "Stop unicorn service"
-  task :stop, :roles => :app, :except => { :no_release => true } do
-    #run "#{try_sudo} kill `cat #{unicorn_pid}`"
-  end
-
-  desc "Stop unicorn service with QUIT signal"
-  task :graceful_stop, :roles => :app, :except => { :no_release => true } do
-    #run "#{try_sudo} kill -s QUIT `cat #{unicorn_pid}`"
-  end
-
-  desc "Stop service and start"
-  task :restart, :roles => :app, :except => { :no_release => true } do
-    stop
-    start
+    to :launch do
+      invoke :'unicorn:restart'
+    end
   end
 end
 
-namespace :remote do
-=begin
-  ### RVM Definitions
-  set :default_environment, {
-    'PATH'          => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247/bin:/home/ubuntu/.rvm/gems/ruby-2.0.0-p247@global/bin:/home/ubuntu/.rvm/rubies/ruby-2.0.0-p247/bin:/home/ubuntu/.rvm/bin:$PATH",
-    'RUBY_VERSION'  => 'ruby 2.0.0',
-    'GEM_HOME'      => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247",
-    'GEM_PATH'      => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247:/home/ubuntu/.rvm/gems/ruby-2.0.0-p247@global",
-    'BUNDLE_PATH'   => "/home/ubuntu/.rvm/gems/ruby-2.0.0-p247@global/gems/bundler-1.3.5",
-  }
+############################
+#     Auxiliar methods     #
+############################
 
-  desc "Run bundle install @ current release"
-  task :bundle_install do
-    run "cd #{current_path} && #{bundle_cmd} install"
+# Create all required dirs on deploy dir
+task create_deploy_dirs: :setup_environment do
+  dirs  = %w{log config tmp/sockets tmp/pids}
+
+  dirs.each do |dir|
+    path  = "#{deploy_to}/#{shared_path}/#{dir}"
+    queue! %[mkdir -p #{path}]
+    queue! %[chmod g+rx,u+rwx #{path}]
   end
-=end
 end
+
+# Install OS dependencies. Initially thinked to setup.
+task install_dependencies: :setup_environment do
+  queue! %[sudo aptitude install git nginx libmysqlclient-dev -y]
+end
+
+# Install RVM from rvm.io recomendations
+task install_rvm: :setup_environment do
+  rvm_path  = "/home/#{user}/.rvm/bin/rvm"
+  queue! %[gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3]
+  queue! %[curl -sSL https://get.rvm.io | bash -s stable]
+  queue! %[#{rvm_path} reload]
+  queue! %[echo "export rvm_max_time_flag=20" >> ~/.rvmrc]
+  queue! %[#{rvm_path} install #{ruby_version}]
+  queue! %[#{rvm_path} all do gem install bundle]
+end
+
+task configure_nginx: :setup_environment do
+  invoke :'nginx:setup'
+  invoke :'nginx:parse'
+  invoke :'nginx:link'
+  invoke :'nginx:restart'
+end
+
+private
+def nginx_template
+  File.expand_path '../../samples/nginx.conf', __FILE__
+end
+
+# For help in making your deploy script, see the Mina documentation:
+#
+#  - http://nadarei.co/mina
+#  - http://nadarei.co/mina/tasks
+#  - http://nadarei.co/mina/settings
+#  - http://nadarei.co/mina/helpers
