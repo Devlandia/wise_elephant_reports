@@ -56,6 +56,29 @@ class OrdersByDay < ActiveRecord::Base
     assemble_response hits_hash, split
   end
 
+  def self.assemble_from_tracker_hash(items)
+    response  = {}
+    split     = {}
+    template  = { hits: 0, conversions: 0, avg_order_value: 0 }
+
+    # Build a hash with default template to each source]
+    items.each { |item| split[item.destination_name] = [] }
+
+    # Split items into sources
+    items.each { |item| split[item.destination_name] << item }
+
+    # Mount hits hash
+    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name, items.first.tracker_name
+
+    # Sumarize for upsells and sales
+    split.each do |key, items|
+      response[key] = template.merge(sumarize(items))
+      response[key] = calculate_avgs(response[key], hits_hash[key]) if hits_hash.has_key?(key)
+    end
+
+    response
+  end
+
   def self.filter(params = {})
     where(assemble_filters(params))
   end
