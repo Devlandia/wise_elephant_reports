@@ -88,7 +88,8 @@ class OrdersByDay < ActiveRecord::Base
 
     split.each do |key, items|
       response[key] = template.merge(sumarize(items))
-      response[key] = calculate_avgs(response[key], hits_hash[key]) if hits_hash.has_key?(key)
+      response[key] = calculate_avg(response[key])
+      response[key] = calculate_conversions(response[key], hits_hash[key]) if hits_hash.has_key?(key)
     end
 
     response
@@ -110,10 +111,15 @@ class OrdersByDay < ActiveRecord::Base
     response
   end
 
-  def self.calculate_avgs(item, hits)
+  def self.calculate_avg(item)
+    item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
+
+    item
+  end
+
+  def self.calculate_conversions(item, hits)
     item[:hits]             = hits
     item[:conversions]      = 100 * item[:sales] / item[:hits]
-    item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
 
     item
   end

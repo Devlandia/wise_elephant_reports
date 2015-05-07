@@ -13,7 +13,7 @@
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>Source</th>
+          <th><%= @group %></th>
           <th># Hits</th>
           <th># Conversions</th>
           <th># Upsells</th>
@@ -23,47 +23,35 @@
           <th># Avg. Order Value</th>
         </tr>
       </thead>
+
       <tbody>
-        <% @total = {:hits => 0,
-                     :conversions => 0,
-                     :upsells => 0,
-                     :sales => 0,
-                     :total_upsells => 0,
-                     :total_sales => 0,
-                     :avg_order_value => 0}; count = 0 %>
-
-        <% @data.each do |info| %>
-          <tr>
-            <td><a href="/<%= @url %>/<%= info[0] %>/date/2015-04-21"><%= info[0] %></a></td>
-            <td><%= info[1][:hits] %></td>
-            <td><%= number_to_percentage info[1][:conversions], precision: 0 %></td>
-            <td><%= info[1][:upsells] %></td>
-            <td><%= info[1][:sales] %></td>
-            <td><%= number_to_currency info[1][:total_upsells] %></td>
-            <td><%= number_to_currency info[1][:total_sales] %></td>
-            <td><%= number_with_precision info[1][:avg_order_value], precision: 2 %></td>
+        <% @data.each do |key, values| %>
+          <tr class="<%= values[:hits] == 0 ? 'warning' : '' %>">
+            <td>
+              <% if @url.nil? %>
+                <%= key %>
+              <% else %>
+                <a href="/<%= @url %>/<%= key %>/date/2015-04-21"><%= key %></a>
+              <% end %>
+            </td>
+            <td><%= values[:hits] %></td>
+            <td><%= number_to_percentage values[:conversions], precision: 0 %></td>
+            <td><%= values[:upsells] %></td>
+            <td><%= values[:sales] %></td>
+            <td><%= number_to_currency values[:total_upsells] %></td>
+            <td><%= number_to_currency values[:total_sales] %></td>
+            <td><%= number_with_precision values[:avg_order_value], precision: 2 %></td>
           </tr>
-
-          <%
-            @total[:hits]            += info[1][:hits]
-            @total[:conversions]     += info[1][:conversions]
-            @total[:upsells]         += info[1][:upsells]
-            @total[:sales]           += info[1][:sales]
-            @total[:total_upsells]   += info[1][:total_upsells]
-            @total[:total_sales]     += info[1][:total_sales]
-            @total[:avg_order_value] += info[1][:avg_order_value]
-            count += 1
-          %>
         <% end %>
         <tr class="success">
           <td>Total</td>
           <td><%= @total[:hits] %></td>
-          <td class='danger'><%= number_to_percentage (@total[:conversions] / count), precision: 0 %></td>
+          <td><%= number_to_percentage @total[:conversions], precision: 2 %></td>
           <td><%= @total[:upsells] %></td>
           <td><%= @total[:sales] %></td>
           <td><%= number_to_currency @total[:total_upsells] %></td>
           <td><%= number_to_currency @total[:total_sales] %></td>
-          <td class='danger'><%= number_with_precision (@total[:avg_order_value] / count), precision: 2 %></td>
+          <td><%= number_with_precision @total[:avg_order_value], precision: 2 %></td>
         </tr>
       </tbody>
     </table>
