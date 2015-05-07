@@ -58,12 +58,12 @@ module Report
       stablish_connection config_file[env]['tusks']
     end
 
-    def log_result(table_name, registers_found, registers_done, log_message)
+    def log_result(date, table_name, registers_found, registers_done, log_message)
       query = <<EOF
   INSERT INTO reports.daily_import_logs
-    (table_name, registers_found, registers_done, log_message)
+    (created_at, table_name, registers_found, registers_done, log_message)
   VALUES
-    ('#{table_name}', #{registers_found}, #{registers_done}, '#{log_message}')
+    ('#{date}', '#{table_name}', #{registers_found}, #{registers_done}, '#{log_message}')
 EOF
       reports_client.query query
     end
