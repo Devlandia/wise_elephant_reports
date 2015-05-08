@@ -14,7 +14,7 @@ class HitsByDay < ActiveRecord::Base
     select_param   = 'orders_by_day.source_display_name, '
     select_param  += 'orders_by_day.tracker_name, ' unless source_name.nil?
     select_param  += 'orders_by_day.destination_name, ' unless tracker_name.nil?
-    select_param  += 'sum(hits_by_day.hits) AS number_of_hits'
+    select_param  += 'hits_by_day.hits'
 
     select_param
   end
@@ -37,9 +37,10 @@ class HitsByDay < ActiveRecord::Base
   end
 
   def self.assemble_group_param(source_name, tracker_name)
-    group_param  = 'orders_by_day.source_display_name'
-    group_param += ', orders_by_day.tracker_name' unless source_name.nil?
-    group_param += ', orders_by_day.destination_name' unless tracker_name.nil?
+    group_param  = 'orders_by_day.source_display_name, '
+    group_param += 'orders_by_day.tracker_name, ' unless source_name.nil?
+    group_param += 'orders_by_day.destination_name, ' unless tracker_name.nil?
+    group_param += 'hits_by_day.hits'
 
     group_param
   end
@@ -48,11 +49,16 @@ class HitsByDay < ActiveRecord::Base
     response  = {}
 
     if source_name.nil?
-      items.each { |item| response[item.source_display_name]  = item.number_of_hits }
+      key = 'source_display_name'
     elsif tracker_name.nil?
-      items.each { |item| response[item.tracker_name]  = item.number_of_hits }
+      key = 'tracker_name'
     else
-      items.each { |item| response[item.destination_name] = item.number_of_hits }
+      key = 'destination_name'
+    end
+
+    items.each do |item|
+      response[eval "item.#{key}"]  = 0 unless response.key?(eval "item.#{key}")
+      response[eval "item.#{key}"]  += item.hits
     end
 
     response
