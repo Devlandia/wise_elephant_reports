@@ -43,8 +43,6 @@ class Routes < Sinatra::Base
         hits_to_orders:   values[:conversions],
         avg_order_value:  values[:avg_order_value],
       }
-
-      debug [items, response]
     end
 
     response
