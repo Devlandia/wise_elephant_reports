@@ -43,7 +43,7 @@ class Routes < Sinatra::Base
       @error = e.message
     end
 
-    erb :dashboard
+    erb :report
   end
 
   get '/source/:name/date/:date' do
@@ -59,7 +59,7 @@ class Routes < Sinatra::Base
       @error = e.message
     end
 
-    erb :dashboard
+    erb :report
   end
 
   get '/tracker/:name/date/:date' do
@@ -75,7 +75,7 @@ class Routes < Sinatra::Base
       @error = e.message
     end
 
-    erb :dashboard
+    erb :report
   end
 
   # API
