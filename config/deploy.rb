@@ -3,13 +3,13 @@ require 'mina/git'
 require 'mina/rvm'
 require 'mina/unicorn'        # https://github.com/scarfacedeb/mina-unicorn
 require 'mina/nginx'          # https://github.com/hbin/mina-nginx
+require 'mina/whenever'
 
 # About unicorn integration:
 # It's necessary config tmp/sockets and tmp/pids on shared_paths and
 # create_deploy_dirs.
 set :domain,        '104.130.124.233'
-#set :branch,        'master'
-set :branch,        'deploy'
+set :branch,        'master'
 set :unicorn_env,   'production'
 set :application,   'reports'
 set :deploy_to,     "/var/www/#{application}"
@@ -46,11 +46,13 @@ task deploy: :environment do
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
     invoke :'deploy:cleanup'
-    invoke :'nginx:restart'
 
     to :launch do
       invoke :'unicorn:restart'
     end
+
+    invoke :'nginx:restart'
+    invoke :'whenever:update'
   end
 end
 

@@ -8,8 +8,10 @@
 #  end
 #end
 
+require 'active_support/all'
+
 APPLICATION_PATH  = File.expand_path(File.dirname(__FILE__))
 
-require "#{APPLICATION_PATH}/app/helpers/mysql_connection_helper.rb"
-
+require "#{APPLICATION_PATH}/lib/debug.rb"
+Dir.glob("#{APPLICATION_PATH}/app/helpers/*_helper.rb").each { |file| import file }
 Dir.glob('./lib/tasks/*.rake').each { |r| import r }

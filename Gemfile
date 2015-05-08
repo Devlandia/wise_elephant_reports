@@ -15,6 +15,8 @@ gem 'rake'
 gem 'activesupport'
 gem 'actionview'
 
+gem 'whenever'
+
 group :development do
   gem 'mina'
   gem 'mina-multistage',  require: false
