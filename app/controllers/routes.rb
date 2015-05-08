@@ -16,15 +16,36 @@ class Routes < Sinatra::Base
   include ActionView::Helpers::NumberHelper
 
   def count_totals(items)
-    response  = { hits: 0, conversions: 0, upsells: 0, sales: 0, total_upsells: 0, total_sales: 0, avg_order_value: 0 }
+    response  = { hits: 0, conversions: 0, upsells: 0, sales: 0, total_upsells: 0, total_sales: 0, avg_order_value: 0, hits_to_orders: 0 }
 
     items.each { |source, values| values.each { |key, value| response[key] += value } }
 
-    total_orders  = response[:sales] + response[:upsells] + 0.0
-    value_orders  = response[:total_upsells] + response[:total_sales] + 0.0
+    total_orders  = response[:conversions] + response[:upsells] + 0.0
+    value_orders  = response[:total_sales] + 0.0
 
-    response[:conversions]      = response[:hits] == 0  ? 0 : total_orders / response[:hits]
     response[:avg_order_value]  = total_orders == 0     ? 0 : value_orders / total_orders
+    response[:hits_to_orders]   = response[:hits] == 0  ? 0 : total_orders / response[:hits]
+
+    response
+  end
+
+  def compose_view_hash(items)
+    response  = {}
+
+    items.each do |source, values|
+      response[source]  = {
+        hits:             values[:hits],
+        conversions:      values[:sales],
+        upsells:          values[:upsells],
+        total_upsells:    values[:total_upsells],
+        sales:            values[:total_sales],
+        total_sales:      values[:total_sales] + values[:total_upsells],
+        hits_to_orders:   values[:conversions],
+        avg_order_value:  values[:avg_order_value],
+      }
+
+      debug [items, response]
+    end
 
     response
   end
@@ -37,7 +58,7 @@ class Routes < Sinatra::Base
     @group  = 'Source'
 
     begin
-      @data   = OrdersByDay.dashboard(params['date'])
+      @data   = compose_view_hash(OrdersByDay.dashboard(params['date']))
       @total  = count_totals @data
     rescue => e
       @error = e.message
@@ -53,7 +74,7 @@ class Routes < Sinatra::Base
     @group  = 'Tracker'
 
     begin
-      @data = OrdersByDay.from_source(params['name'], params['date'])
+      @data = compose_view_hash(OrdersByDay.from_source(params['name'], params['date']))
       @total  = count_totals @data
     rescue => e
       @error = e.message
@@ -69,7 +90,7 @@ class Routes < Sinatra::Base
     @group  = 'Destination'
 
     begin
-      @data = OrdersByDay.from_tracker(params['name'], params['date'])
+      @data = compose_view_hash(OrdersByDay.from_tracker(params['name'], params['date']))
       @total  = count_totals @data
     rescue => e
       @error = e.message
