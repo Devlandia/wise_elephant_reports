@@ -9,13 +9,12 @@ require "#{APPLICATION_PATH}/lib/debug.rb"
 
 include Report::MysqlConnection
 
-current_day = Time.new
-limit_day   = tusks_client.query('SELECT min(created) AS min FROM sm_orders').first['min']
+current_day = tusks_client.query('SELECT min(created) AS min FROM sm_orders').first['min']
+limit_day   = Time.new - 1.day
 
-while current_day >= limit_day
-
+while current_day <= limit_day
   system "rake db:update_hits_table[#{current_day.strftime('%Y-%m-%d')}]"
   system "rake db:update_orders_table[#{current_day.strftime('%Y-%m-%d')}]"
 
-  current_day -= 1.day
+  current_day += 1.day
 end

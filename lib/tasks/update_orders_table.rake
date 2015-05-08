@@ -12,7 +12,7 @@ namespace :db do
 
     begin
       # Define today if is informed as param
-      today = args[:day].nil? ? Time.new.strftime('%Y-%m-%d') : Date.parse(args[:day]).strftime('%Y-%m-%d')
+      today = args[:day].nil? ? (Time.new - 1.day).strftime('%Y-%m-%d') : Date.parse(args[:day]).strftime('%Y-%m-%d')
 
       # Check if todays data already exists
       query   = "SELECT count(0) AS total FROM reports.orders_by_day WHERE created_at = '#{today}' LIMIT 1"
