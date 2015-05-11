@@ -35,8 +35,13 @@
     </nav>
 
     <div class="container" role="main">
+      <%= partial :'_filters.html', { filters: @filters } %>
+
       <%if @error then %>
-        <div class="alert alert-error"><%= @error %></div>
+        <p class="bg-warning">
+          <%= @error %>
+          <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </p>
       <% end %>
 
       <%= yield %>

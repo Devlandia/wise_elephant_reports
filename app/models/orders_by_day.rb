@@ -3,16 +3,45 @@ class OrdersByDay < ActiveRecord::Base
 
   has_many :hits_by_day, class_name: 'HitsByDay', foreign_key: [:tracker_name, :destination_name, :created_at]
 
-  def self.dashboard(date)
+  def self.dashboard(params)
+    fail 'Start date not informed'  unless params.has_key? :start_date
+    fail 'End date not informed'    unless params.has_key? :end_date
+
     # Group by source type to informed day
     items = OrdersByDay .select('source_name, source_display_name, order_type, created_at, sum(number_of_orders) AS number_of_orders, sum(value_of_orders) AS value_of_orders')
-                        .where(created_at: date)
+                        .where(assemble_where params)
                         .group('source_name, source_display_name, order_type, created_at')
 
+    #debug items
     assemble_dashboard_hash items
   end
 
+  def self.assemble_where(params)
+    response  = nil
+    vars      = []
+
+    if params[:end_date].blank?
+      response = "created_at = ?"
+      vars << params[:start_date]
+    else
+      #response = "created_at >= '#{params[:start_date]}' and created_at <= '#{params[:end_date]}'" 
+      response = "created_at >= ? AND created_at <= ?"
+      vars << params[:start_date]
+      vars << params[:end_date]
+    end
+
+    unless params[:tracker_name].blank?
+      response += " AND orders_by_day.tracker_name LIKE ?"
+      vars << "%#{params[:tracker_name]}%"
+    end
+
+    [response] + vars
+  end
+
   def self.from_source(source_display_name, date)
+    fail 'Start date invalid'           unless params.has_key? :start_date
+    fail 'Source display name invalid'  unless params.has_key? :source_display_name
+
     params    = { 'source_display_name' => source_display_name, 'created_at' => date }
     items     = filter params
 
@@ -27,6 +56,7 @@ class OrdersByDay < ActiveRecord::Base
   end
 
   def self.assemble_dashboard_hash(items)
+    return items if items.empty?
     split     = assemble_split_hash(items, 'source_display_name')
 
     # Mount hits hash

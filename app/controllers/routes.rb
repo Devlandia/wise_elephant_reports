@@ -16,19 +16,24 @@ class Routes < Sinatra::Base
   include ActionView::Helpers::NumberHelper
 
   helpers ResultsParser
+  helpers FiltersParser
+  helpers Partials
 
   # Frontent
-  get '/dashboard/:date' do
-    @title  = 'All Traffic'
-    @date   = Date.parse params[:date]
-    @url    = 'source'
-    @group  = 'Source'
+  get '/dashboard' do
+    debug params
+    @title    = 'All Traffic'
+    #@date     = Date.parse params[:date]
+    @url      = 'source'
+    @group    = 'Source'
+    @filters  = parse_filters params
 
-    begin
-      @data   = compose_view_hash(OrdersByDay.dashboard(params['date']))
+    if @filters[:start_date].blank?
+      @errors = 'Please set Start Date at least'
+      @data   = {}
+    else
+      @data   = compose_view_hash(OrdersByDay.dashboard(@filters))
       @total  = count_totals @data
-    rescue => e
-      @error = e.message
     end
 
     erb :report
