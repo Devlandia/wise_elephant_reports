@@ -19,7 +19,7 @@
 
 # Learn more: http://github.com/javan/whenever
 
-set :output, 'var/www/reports/shared/log/cron_log.log'
+set :output, '/var/www/reports/shared/log/cron_log.log'
 
 every 1.day, at: '1:00 am' do
   rake "db:update_hits_table"
