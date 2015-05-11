@@ -12,8 +12,16 @@ class OrdersByDay < ActiveRecord::Base
                         .where(assemble_where params)
                         .group('source_name, source_display_name, order_type, created_at')
 
-    #debug items
     assemble_dashboard_hash items
+  end
+
+  def self.from_source(params = {})
+    fail 'Start date invalid'           unless params.has_key? :start_date
+    fail 'Source display name invalid'  unless params.has_key? :source_display_name
+
+    items       = where assemble_where(params)
+
+    assemble_from_source_hash items
   end
 
   def self.assemble_where(params)
@@ -24,10 +32,14 @@ class OrdersByDay < ActiveRecord::Base
       response = "created_at = ?"
       vars << params[:start_date]
     else
-      #response = "created_at >= '#{params[:start_date]}' and created_at <= '#{params[:end_date]}'" 
       response = "created_at >= ? AND created_at <= ?"
       vars << params[:start_date]
       vars << params[:end_date]
+    end
+
+    if params.has_key? :source_display_name
+      response += " AND source_display_name = ?"
+      vars << params[:source_display_name]
     end
 
     unless params[:tracker_name].blank?
@@ -36,16 +48,6 @@ class OrdersByDay < ActiveRecord::Base
     end
 
     [response] + vars
-  end
-
-  def self.from_source(source_display_name, date)
-    fail 'Start date invalid'           unless params.has_key? :start_date
-    fail 'Source display name invalid'  unless params.has_key? :source_display_name
-
-    params    = { 'source_display_name' => source_display_name, 'created_at' => date }
-    items     = filter params
-
-    assemble_from_source_hash items
   end
 
   def self.from_tracker(tracker_name, date)
@@ -84,23 +86,6 @@ class OrdersByDay < ActiveRecord::Base
 
     # Sumarize for upsells and sales
     assemble_response hits_hash, split
-  end
-
-  def self.filter(params = {})
-    where(assemble_filters(params))
-  end
-
-  def self.assemble_filters(params)
-    filters = {}
-
-    filters[:tracker_id]          = params['tracker_id'].to_i                       if params.key? 'tracker_id'
-    filters[:destination_id]      = params['destination_id'].to_i                   if params.key? 'destination_id'
-    filters[:order_type]          = params['order_type']                            if params.key? 'order_type'
-    filters[:created_at]          = Date.strptime(params['created_at'], '%Y-%m-%d') if params.key? 'created_at'
-    filters[:source_display_name] = params['source_display_name'] if params.key? 'source_display_name'
-    filters[:tracker_name]        = params['tracker_name']        if params.key? 'tracker_name'
-
-    filters
   end
 
   def self.assemble_split_hash(items, key)

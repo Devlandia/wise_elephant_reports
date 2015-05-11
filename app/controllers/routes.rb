@@ -21,12 +21,11 @@ class Routes < Sinatra::Base
 
   # Frontent
   get '/dashboard' do
-    debug params
-    @title    = 'All Traffic'
-    #@date     = Date.parse params[:date]
-    @url      = 'source'
-    @group    = 'Source'
-    @filters  = parse_filters params
+    @title        = 'All Traffic'
+    @url          = 'source'
+    @group        = 'Source'
+    @filters      = parse_dashboard_filters params
+    @query_params = compose_filters_param @filters
 
     if @filters[:start_date].blank?
       @errors = 'Please set Start Date at least'
@@ -39,33 +38,37 @@ class Routes < Sinatra::Base
     erb :report
   end
 
-  get '/source/:name/date/:date' do
-    @title  = "Source #{params['name']}"
-    @date   = Date.parse params[:date]
-    @url    = 'tracker'
-    @group  = 'Tracker'
+  get '/source/:source_display_name' do
+    @title        = "Source #{params['name']}"
+    @url          = 'tracker'
+    @group        = 'Tracker'
+    @filters      = parse_source_filters params
+    @query_params = compose_filters_param @filters
 
-    begin
-      @data = compose_view_hash(OrdersByDay.from_source(params['name'], params['date']))
+    if @filters[:start_date].blank?
+      @errors = 'Please set Start Date at least'
+      @data   = {}
+    else
+      @data   = compose_view_hash(OrdersByDay.from_source(@filters))
       @total  = count_totals @data
-    rescue => e
-      @error = e.message
     end
 
     erb :report
   end
 
-  get '/tracker/:name/date/:date' do
-    @title  = params['name']
-    @date   = Date.parse params[:date]
-    @url    = nil
-    @group  = 'Destination'
+  get '/tracker/:name' do
+    @title        = params['name']
+    @url          = nil
+    @group        = 'Destination'
+    @filters      = parse_tracker_filters params
+    @query_params = compose_filters_param @filters
 
-    begin
+    if @filters[:start_date].blank?
+      @errors = 'Please set Start Date at least'
+      @data   = {}
+    else
       @data = compose_view_hash(OrdersByDay.from_tracker(params['name'], params['date']))
       @total  = count_totals @data
-    rescue => e
-      @error = e.message
     end
 
     erb :report
