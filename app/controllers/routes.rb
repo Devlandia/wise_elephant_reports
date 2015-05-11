@@ -24,52 +24,28 @@ class Routes < Sinatra::Base
     @title        = 'All Traffic'
     @url          = 'source'
     @group        = 'Source'
-    @filters      = parse_filters 'dashboard', params
-    @query_params = compose_filters_param @filters
 
-    if @filters[:start_date].blank?
-      @errors = 'Please set Start Date at least'
-      @data   = {}
-    else
-      @data   = compose_view_hash(OrdersByDay.dashboard(@filters))
-      @total  = count_totals @data
-    end
+    set_view_attrs 'dashboard', params
 
     erb :report
   end
 
   get '/source/:source_display_name' do
-    @title        = "Source #{params['name']}"
+    @title        = "Source #{params['source_display_name']}"
     @url          = 'tracker'
     @group        = 'Tracker'
-    @filters      = parse_filters 'source', params
-    @query_params = compose_filters_param @filters
 
-    if @filters[:start_date].blank?
-      @errors = 'Please set Start Date at least'
-      @data   = {}
-    else
-      @data   = compose_view_hash(OrdersByDay.from_source(@filters))
-      @total  = count_totals @data
-    end
+    set_view_attrs 'source', params
 
     erb :report
   end
 
   get '/tracker/:tracker_name' do
-    @title        = params['name']
+    @title        = params['tracker_name']
     @url          = nil
     @group        = 'Destination'
-    @filters      = parse_filters 'tracker', params
-    @query_params = compose_filters_param @filters
 
-    if @filters[:start_date].blank?
-      @errors = 'Please set Start Date at least'
-      @data   = {}
-    else
-      @data = compose_view_hash(OrdersByDay.from_tracker(@filters))
-      @total  = count_totals @data
-    end
+    set_view_attrs 'tracker', params
 
     erb :report
   end
