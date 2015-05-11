@@ -24,7 +24,7 @@ class Routes < Sinatra::Base
     @title        = 'All Traffic'
     @url          = 'source'
     @group        = 'Source'
-    @filters      = parse_dashboard_filters params
+    @filters      = parse_filters 'dashboard', params
     @query_params = compose_filters_param @filters
 
     if @filters[:start_date].blank?
@@ -42,7 +42,7 @@ class Routes < Sinatra::Base
     @title        = "Source #{params['name']}"
     @url          = 'tracker'
     @group        = 'Tracker'
-    @filters      = parse_source_filters params
+    @filters      = parse_filters 'source', params
     @query_params = compose_filters_param @filters
 
     if @filters[:start_date].blank?
@@ -56,18 +56,18 @@ class Routes < Sinatra::Base
     erb :report
   end
 
-  get '/tracker/:name' do
+  get '/tracker/:tracker_name' do
     @title        = params['name']
     @url          = nil
     @group        = 'Destination'
-    @filters      = parse_tracker_filters params
+    @filters      = parse_filters 'tracker', params
     @query_params = compose_filters_param @filters
 
     if @filters[:start_date].blank?
       @errors = 'Please set Start Date at least'
       @data   = {}
     else
-      @data = compose_view_hash(OrdersByDay.from_tracker(params['name'], params['date']))
+      @data = compose_view_hash(OrdersByDay.from_tracker(@filters))
       @total  = count_totals @data
     end
 

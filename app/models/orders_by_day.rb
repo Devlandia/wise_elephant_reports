@@ -19,9 +19,20 @@ class OrdersByDay < ActiveRecord::Base
     fail 'Start date invalid'           unless params.has_key? :start_date
     fail 'Source display name invalid'  unless params.has_key? :source_display_name
 
-    items       = where assemble_where(params)
+    items = where assemble_where(params)
 
     assemble_from_source_hash items
+  end
+
+  def self.from_tracker(params = {})
+    fail 'Start date invalid'    unless params.has_key? :start_date
+    fail 'Tracker name invalid' unless params.has_key?  :tracker_name
+
+    debug params
+
+    items = where assemble_where(params)
+
+    assemble_from_tracker_hash items
   end
 
   def self.assemble_where(params)
@@ -50,13 +61,6 @@ class OrdersByDay < ActiveRecord::Base
     [response] + vars
   end
 
-  def self.from_tracker(tracker_name, date)
-    params    = { 'tracker_name' => tracker_name, 'created_at' => date }
-    items     = filter params
-
-    assemble_from_tracker_hash items
-  end
-
   def self.assemble_dashboard_hash(items)
     return items if items.empty?
     split     = assemble_split_hash(items, 'source_display_name')
@@ -69,6 +73,8 @@ class OrdersByDay < ActiveRecord::Base
   end
 
   def self.assemble_from_source_hash(items)
+    return items if items.empty?
+
     split     = assemble_split_hash(items, 'tracker_name')
 
     # Mount hits hash
@@ -79,6 +85,8 @@ class OrdersByDay < ActiveRecord::Base
   end
 
   def self.assemble_from_tracker_hash(items)
+    return items if items.empty?
+
     split     = assemble_split_hash(items, 'destination_name')
 
     # Mount hits hash
