@@ -4,7 +4,7 @@ class HitsByDay < ActiveRecord::Base
   def self.hash_by_day(date, source_name = nil, tracker_name = nil)
     items = HitsByDay .select(assemble_select_param source_name, tracker_name)
                       .joins(assemble_joins_param)
-                      .group(assemble_group_param source_name, tracker_name)
+                      .group(assemble_select_param source_name, tracker_name)
                       .where(assemble_where_param date, source_name, tracker_name)
 
     group_results items, source_name, tracker_name
@@ -36,18 +36,7 @@ class HitsByDay < ActiveRecord::Base
     where_param
   end
 
-  def self.assemble_group_param(source_name, tracker_name)
-    group_param  = 'orders_by_day.source_display_name, '
-    group_param += 'orders_by_day.tracker_name, ' unless source_name.nil?
-    group_param += 'orders_by_day.destination_name, ' unless tracker_name.nil?
-    group_param += 'hits_by_day.hits'
-
-    group_param
-  end
-
   def self.group_results(items, source_name, tracker_name)
-    response  = {}
-
     if source_name.nil?
       key = 'source_display_name'
     elsif tracker_name.nil?
@@ -55,6 +44,12 @@ class HitsByDay < ActiveRecord::Base
     else
       key = 'destination_name'
     end
+
+    group_by_key items, key
+  end
+
+  def self.group_by_key(items, key)
+    response  = {}
 
     items.each do |item|
       response[eval "item.#{key}"]  = 0 unless response.key?(eval "item.#{key}")
