@@ -34,10 +34,8 @@ module ViewVarsParser
 
     if level == 'dashboard'
       OrdersByDay.dashboard filters
-    elsif level == 'source'
-      OrdersByDay.from_source filters
     else
-      OrdersByDay.from_tracker filters
+      OrdersByDay.from_orders filters
     end
   end
 end

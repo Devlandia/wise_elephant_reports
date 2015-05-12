@@ -4,8 +4,7 @@ class OrdersByDay < ActiveRecord::Base
   has_many :hits_by_day, class_name: 'HitsByDay', foreign_key: [:tracker_name, :destination_name, :created_at]
 
   def self.dashboard(params)
-    fail 'Start date not informed'  unless params.has_key? :start_date
-    fail 'End date not informed'    unless params.has_key? :end_date
+    validate_params params
 
     # Group by source type to informed day
     items = OrdersByDay .select('source_name, source_display_name, order_type, created_at, sum(number_of_orders) AS number_of_orders, sum(value_of_orders) AS value_of_orders')
@@ -18,26 +17,27 @@ class OrdersByDay < ActiveRecord::Base
     assemble_response hits_hash, split
   end
 
-  def self.from_source(params = {})
-    fail 'Start date invalid'           unless params.has_key? :start_date
-    fail 'Source display name invalid'  unless params.has_key? :source_display_name
+  def self.from_orders(params = {})
+    validate_params params
 
     items     = where assemble_where(params)
-    split     = assemble_split_hash(items, 'tracker_name')
+    grouper   = params[:level] == 'source' ? 'tracker_name' : 'destination_name'
+    split     = assemble_split_hash items, grouper
     hits_hash = HitsByDay.hash_by_day params
 
     assemble_response hits_hash, split
   end
 
-  def self.from_tracker(params = {})
-    fail 'Start date invalid'    unless params.has_key? :start_date
-    fail 'Tracker name invalid' unless params.has_key?  :tracker_name
+  def self.validate_params(params)
+    fail 'Start date not informed'  unless params.has_key? :start_date
 
-    items     = where assemble_where(params)
-    split     = assemble_split_hash(items, 'destination_name')
-    hits_hash = HitsByDay.hash_by_day params
-
-    assemble_response hits_hash, split
+    if params[:level] == 'dashboard'
+      fail 'End date not informed'    unless params.has_key? :end_date
+    elsif params[:level] == 'source'
+      fail 'Source display name invalid'  unless params.has_key? :source_display_name
+    else
+      fail 'Tracker name invalid' unless params.has_key?  :tracker_name
+    end
   end
 
   def self.assemble_where(params)
