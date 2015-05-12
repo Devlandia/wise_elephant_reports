@@ -6,6 +6,7 @@ gem 'unicorn'
 gem 'shotgun'
 gem 'rspec'
 gem 'rack-test'
+gem 'racksh'
 
 gem 'sinatra-activerecord'
 gem 'sqlite3'
