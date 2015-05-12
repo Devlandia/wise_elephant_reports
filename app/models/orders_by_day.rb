@@ -12,27 +12,32 @@ class OrdersByDay < ActiveRecord::Base
                         .where(assemble_where params)
                         .group('source_name, source_display_name, order_type, created_at')
 
-    assemble_dashboard_hash items
+    split     = assemble_split_hash(items, 'source_display_name')
+    hits_hash = HitsByDay.hash_by_day params
+
+    assemble_response hits_hash, split
   end
 
   def self.from_source(params = {})
     fail 'Start date invalid'           unless params.has_key? :start_date
     fail 'Source display name invalid'  unless params.has_key? :source_display_name
 
-    items = where assemble_where(params)
+    items     = where assemble_where(params)
+    split     = assemble_split_hash(items, 'tracker_name')
+    hits_hash = HitsByDay.hash_by_day params
 
-    assemble_from_source_hash items
+    assemble_response hits_hash, split
   end
 
   def self.from_tracker(params = {})
     fail 'Start date invalid'    unless params.has_key? :start_date
     fail 'Tracker name invalid' unless params.has_key?  :tracker_name
 
-    debug params
+    items     = where assemble_where(params)
+    split     = assemble_split_hash(items, 'destination_name')
+    hits_hash = HitsByDay.hash_by_day params
 
-    items = where assemble_where(params)
-
-    assemble_from_tracker_hash items
+    assemble_response hits_hash, split
   end
 
   def self.assemble_where(params)
@@ -54,46 +59,16 @@ class OrdersByDay < ActiveRecord::Base
     end
 
     unless params[:tracker_name].blank?
-      response += " AND orders_by_day.tracker_name LIKE ?"
-      vars << "%#{params[:tracker_name]}%"
+      if params[:level] == 'tracker'
+        response += " AND orders_by_day.tracker_name = ?"
+        vars << params[:tracker_name]
+      else
+        response += " AND orders_by_day.tracker_name LIKE ?"
+        vars << "%#{params[:tracker_name]}%"
+      end
     end
 
     [response] + vars
-  end
-
-  def self.assemble_dashboard_hash(items)
-    return items if items.empty?
-    split     = assemble_split_hash(items, 'source_display_name')
-
-    # Mount hits hash
-    hits_hash = HitsByDay.hash_by_day items.first.created_at
-
-    # Sumarize for upsells and sales
-    assemble_response hits_hash, split
-  end
-
-  def self.assemble_from_source_hash(items)
-    return items if items.empty?
-
-    split     = assemble_split_hash(items, 'tracker_name')
-
-    # Mount hits hash
-    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name
-
-    # Sumarize for upsells and sales
-    assemble_response hits_hash, split
-  end
-
-  def self.assemble_from_tracker_hash(items)
-    return items if items.empty?
-
-    split     = assemble_split_hash(items, 'destination_name')
-
-    # Mount hits hash
-    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name, items.first.tracker_name
-
-    # Sumarize for upsells and sales
-    assemble_response hits_hash, split
   end
 
   def self.assemble_split_hash(items, key)

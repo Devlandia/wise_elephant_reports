@@ -18,6 +18,7 @@ class Routes < Sinatra::Base
   helpers ResultsParser
   helpers FiltersParser
   helpers Partials
+  helpers ViewVarsParser
 
   # Frontent
   get '/dashboard' do
