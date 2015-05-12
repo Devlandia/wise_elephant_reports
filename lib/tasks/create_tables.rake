@@ -11,7 +11,7 @@ end
 
 def create_hits_by_day(client)
     query =<<EOF
-CREATE TABLE reports.hits_by_day (
+CREATE TABLE mastodon.hits_by_day (
   id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
   created_at date DEFAULT NULL,
   tracker_name varchar(70) CHARACTER SET utf8 DEFAULT NULL,
@@ -21,10 +21,10 @@ CREATE TABLE reports.hits_by_day (
 EOF
     client.query query
 
-    query = "CREATE INDEX reports_hits_by_day_created_at_idx ON reports.hits_by_day(created_at) USING BTREE;"
+    query = "CREATE INDEX reports_hits_by_day_created_at_idx ON mastodon.hits_by_day(created_at) USING BTREE;"
     client.query query
 
-    query = "CREATE INDEX reports_hits_by_day_created_at_tracker_name_idx ON reports.hits_by_day(created_at, tracker_name) USING BTREE"
+    query = "CREATE INDEX reports_hits_by_day_created_at_tracker_name_idx ON mastodon.hits_by_day(created_at, tracker_name) USING BTREE"
     client.query query
 end
 
@@ -50,19 +50,19 @@ CREATE TABLE orders_by_day (
 EOF
     client.query query
 
-    query = 'CREATE INDEX reports_order_by_day_order_type_idx ON reports.orders_by_day(order_type) USING BTREE;';
+    query = 'CREATE INDEX reports_order_by_day_order_type_idx ON mastodon.orders_by_day(order_type) USING BTREE;';
     client.query query
 
-    query = 'CREATE INDEX reports_order_by_day_destination_id_idx ON reports.orders_by_day(destination_id) USING BTREE;';
+    query = 'CREATE INDEX reports_order_by_day_destination_id_idx ON mastodon.orders_by_day(destination_id) USING BTREE;';
     client.query query
 
-    query = 'CREATE INDEX reports_order_by_day_tracker_id_idx ON reports.orders_by_day(tracker_id) USING BTREE;';
+    query = 'CREATE INDEX reports_order_by_day_tracker_id_idx ON mastodon.orders_by_day(tracker_id) USING BTREE;';
     client.query query
 end
 
 def create_import_logs(client)
     query =<<EOF
-CREATE TABLE reports.daily_import_logs(
+CREATE TABLE mastodon.daily_import_logs(
   id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
   created_at timestamp default now(),
   table_name VARCHAR(100) NOT NULL,

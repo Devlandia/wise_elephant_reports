@@ -15,7 +15,7 @@ namespace :db do
       today = args[:day].nil? ? (Time.new - 1.day).strftime('%Y-%m-%d') : Date.parse(args[:day]).strftime('%Y-%m-%d')
 
       # Check if todays data already exists
-      query   = "SELECT count(0) AS total FROM reports.orders_by_day WHERE created_at = '#{today}' LIMIT 1"
+      query   = "SELECT count(0) AS total FROM mastodon.orders_by_day WHERE created_at = '#{today}' LIMIT 1"
       result  = reports_client.query(query, symbolize_keys: true).first[:total]
       fail "Data to #{today} already exists." unless result == 0
 
@@ -55,7 +55,7 @@ end
 
 def assemble_orders_insert_query(item)
 <<EOF
-INSERT INTO reports.orders_by_day (
+INSERT INTO mastodon.orders_by_day (
   destination_id,
   tracker_id,
   order_type,
