@@ -21,7 +21,7 @@ namespace :db do
 
       # Read all items for today
       query   = assemble_orders_search_query(today)
-      results = wiseleph_hattan_client.query query, symbolize_keys: true
+      results = tusks_client.query query, symbolize_keys: true
 
       registers_found = results.size
       results.each do |item|
@@ -113,15 +113,15 @@ SELECT
   COUNT(0) AS number_of_orders,
   SUM(t1.total) AS value_of_orders
 FROM
-  tusks.sm_orders AS t1
+  pachyderm.sm_orders AS t1
 INNER JOIN
-  tusks.sm_trackers AS t2 ON t2.id = t1.tracker_id
+  pachyderm.sm_trackers AS t2 ON t2.id = t1.tracker_id
 INNER JOIN
-  tusks.sm_destinations AS t3 ON t3.id = t1.destination_id
+  pachyderm.sm_destinations AS t3 ON t3.id = t1.destination_id
 INNER JOIN
-  tusks.sm_platforms AS t4 ON t2.platform_id = t4.id
+  pachyderm.sm_platforms AS t4 ON t2.platform_id = t4.id
 INNER JOIN
-  tusks.sm_sources AS t5 ON t4.source_id = t5.id
+  pachyderm.sm_sources AS t5 ON t4.source_id = t5.id
 WHERE
   DATE(t1.created) = '#{today}'
 GROUP BY
