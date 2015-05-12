@@ -38,7 +38,7 @@ class HitsByDay < ActiveRecord::Base
     response  = nil
     vars      = []
 
-    if end_date.nil?
+    if end_date.blank?
       response = "hits_by_day.created_at = ?"
       vars << start_date
     else
@@ -47,12 +47,12 @@ class HitsByDay < ActiveRecord::Base
       vars << end_date
     end
 
-    unless source_name.nil?
+    unless source_name.blank?
       response += " AND orders_by_day.source_name = ?"
       vars << source_name
     end
 
-    unless tracker_name.nil?
+    unless tracker_name.blank?
       if level == 'tracker'
         response += " AND orders_by_day.tracker_name = ?"
         vars << tracker_name
