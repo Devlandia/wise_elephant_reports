@@ -17,7 +17,7 @@ set :repository,    'git@github.com:Devlandia/wise_elephant_reports.git'
 set :user,          'devlandia'
 set :forward_agent, true
 set :port,          '22'
-set :shared_paths,  %w{ log tmp/sockets tmp/pids config/database.yml }
+set :shared_paths,  %w{ log tmp/sockets tmp/pids config/database.yml config/settings.yml }
 
 # My settings from mina extensions
 set :ruby_version,    '2.2.0'

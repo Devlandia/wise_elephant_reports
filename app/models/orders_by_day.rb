@@ -3,74 +3,72 @@ class OrdersByDay < ActiveRecord::Base
 
   has_many :hits_by_day, class_name: 'HitsByDay', foreign_key: [:tracker_name, :destination_name, :created_at]
 
-  def self.dashboard(date)
+  def self.dashboard(params)
+    fail 'Start date not informed'  unless params.has_key? :start_date
+    fail 'End date not informed'    unless params.has_key? :end_date
+
     # Group by source type to informed day
     items = OrdersByDay .select('source_name, source_display_name, order_type, created_at, sum(number_of_orders) AS number_of_orders, sum(value_of_orders) AS value_of_orders')
-                        .where(created_at: date)
+                        .where(assemble_where params)
                         .group('source_name, source_display_name, order_type, created_at')
 
-    assemble_dashboard_hash items
-  end
-
-  def self.from_source(source_display_name, date)
-    params    = { 'source_display_name' => source_display_name, 'created_at' => date }
-    items     = filter params
-
-    assemble_from_source_hash items
-  end
-
-  def self.from_tracker(tracker_name, date)
-    params    = { 'tracker_name' => tracker_name, 'created_at' => date }
-    items     = filter params
-
-    assemble_from_tracker_hash items
-  end
-
-  def self.assemble_dashboard_hash(items)
     split     = assemble_split_hash(items, 'source_display_name')
+    hits_hash = HitsByDay.hash_by_day params
 
-    # Mount hits hash
-    hits_hash = HitsByDay.hash_by_day items.first.created_at
-
-    # Sumarize for upsells and sales
     assemble_response hits_hash, split
   end
 
-  def self.assemble_from_source_hash(items)
+  def self.from_source(params = {})
+    fail 'Start date invalid'           unless params.has_key? :start_date
+    fail 'Source display name invalid'  unless params.has_key? :source_display_name
+
+    items     = where assemble_where(params)
     split     = assemble_split_hash(items, 'tracker_name')
+    hits_hash = HitsByDay.hash_by_day params
 
-    # Mount hits hash
-    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name
-
-    # Sumarize for upsells and sales
     assemble_response hits_hash, split
   end
 
-  def self.assemble_from_tracker_hash(items)
+  def self.from_tracker(params = {})
+    fail 'Start date invalid'    unless params.has_key? :start_date
+    fail 'Tracker name invalid' unless params.has_key?  :tracker_name
+
+    items     = where assemble_where(params)
     split     = assemble_split_hash(items, 'destination_name')
+    hits_hash = HitsByDay.hash_by_day params
 
-    # Mount hits hash
-    hits_hash = HitsByDay.hash_by_day items.first.created_at, items.first.source_name, items.first.tracker_name
-
-    # Sumarize for upsells and sales
     assemble_response hits_hash, split
   end
 
-  def self.filter(params = {})
-    where(assemble_filters(params))
-  end
+  def self.assemble_where(params)
+    response  = nil
+    vars      = []
 
-  def self.assemble_filters(params)
-    filters = {}
+    if params[:end_date].blank?
+      response = "created_at = ?"
+      vars << params[:start_date]
+    else
+      response = "created_at >= ? AND created_at <= ?"
+      vars << params[:start_date]
+      vars << params[:end_date]
+    end
 
-    filters[:tracker_id]          = params['tracker_id'].to_i                       if params.key? 'tracker_id'
-    filters[:destination_id]      = params['destination_id'].to_i                   if params.key? 'destination_id'
-    filters[:order_type]          = params['order_type']                            if params.key? 'order_type'
-    filters[:created_at]          = Date.strptime(params['created_at'], '%Y-%m-%d') if params.key? 'created_at'
-    filters[:source_display_name] = params['source_display_name'] if params.key? 'source_display_name'
-    filters[:tracker_name]        = params['tracker_name']        if params.key? 'tracker_name'
+    if params.has_key? :source_display_name
+      response += " AND source_display_name = ?"
+      vars << params[:source_display_name]
+    end
 
-    filters
+    unless params[:tracker_name].blank?
+      if params[:level] == 'tracker'
+        response += " AND orders_by_day.tracker_name = ?"
+        vars << params[:tracker_name]
+      else
+        response += " AND orders_by_day.tracker_name LIKE ?"
+        vars << "%#{params[:tracker_name]}%"
+      end
+    end
+
+    [response] + vars
   end
 
   def self.assemble_split_hash(items, key)

@@ -1,11 +1,5 @@
-<!-- Main jumbotron for a primary marketing message or call to action -->
-<div class="jumbotron">
-  <h1>Title</h1>
-  <p>Any text you wanna insert here.</p>
-</div>
-
 <div class="page-header">
-  <h1><%= @title %> <small><%= @date.inspect %></small></h1>
+  <h1><%= @title %> <small><%= @period %></small></h1>
 </div>
 
 <div class="row">
@@ -32,7 +26,7 @@
               <% if @url.nil? %>
                 <%= key %>
               <% else %>
-                <a href="/<%= @url %>/<%= key %>/date/2015-04-21"><%= key %></a>
+                <a href="/<%= @url %>/<%= key %><%= @query_params %>"><%= key %></a>
               <% end %>
             </td>
             <td><%= values[:hits] %></td>
@@ -45,17 +39,19 @@
             <td><%= number_to_percentage values[:hits_to_orders], precision: 0 %></td>
           </tr>
         <% end %>
-        <tr class="success">
-          <td>Total</td>
-          <td><%= @total[:hits] %></td>
-          <td><%= @total[:conversions] %></td>
-          <td><%= @total[:upsells] %></td>
-          <td><%= number_to_currency @total[:sales] %></td>
-          <td><%= number_to_currency @total[:total_upsells] %></td>
-          <td><%= number_to_currency @total[:total_sales] %></td>
-          <td><%= number_to_currency @total[:avg_order_value] %></td>
-          <td><%= number_to_percentage @total[:hits_to_orders], precision: 0 %></td>
-        </tr>
+        <% unless @total.blank? %>
+          <tr class="success">
+            <td>Total</td>
+            <td><%= @total[:hits] %></td>
+            <td><%= @total[:conversions] %></td>
+            <td><%= @total[:upsells] %></td>
+            <td><%= number_to_currency @total[:sales] %></td>
+            <td><%= number_to_currency @total[:total_upsells] %></td>
+            <td><%= number_to_currency @total[:total_sales] %></td>
+            <td><%= number_to_currency @total[:avg_order_value] %></td>
+            <td><%= number_to_percentage @total[:hits_to_orders], precision: 0 %></td>
+          </tr>
+        <% end %>
       </tbody>
     </table>
   </div>

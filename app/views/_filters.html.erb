@@ -1,0 +1,36 @@
+<h2>Filters</h2>
+
+<fieldset>
+  <legend>Filters</legend>
+
+  <form class="form-horizontal" id="search_form" name="search_form" method="GET" action="">
+    <div class="form-group">
+      <label for="start_date"  class="col-sm-1 control-label">Start date</label>
+      <div class="col-sm-2">
+        <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="yyyy-mm-dd" value="<%= @filters[:start_date] %>" />
+      </div>  
+
+      <label for="end_date"  class="col-sm-1 control-label">End date</label>
+      <div class="col-sm-2">
+        <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="yyyy-mm-dd" value="<%= @filters[:end_date] %>" />
+      </div>  
+
+      <% unless @group == 'Destination' %>
+        <label for="tracker_name"  class="col-sm-2 control-label">Tracker name</label>
+        <div class="col-sm-4">
+          <input type="text" class="form-control" id="tracker_name" name="tracker_name" placeholder="type some part of tracker name" value="<%= @filters[:tracker_name] %>" />
+        </div>  
+      <% end %>
+    </div>
+
+    <button type="submit" class="btn btn-default">Search</button>
+  </form>
+</fieldset>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.datepicker').datepicker({
+      format: 'yyyy-mm-dd'
+    });
+  });
+</script>
