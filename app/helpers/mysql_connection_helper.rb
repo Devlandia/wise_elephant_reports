@@ -60,7 +60,7 @@ module Report
 
     def log_result(date, table_name, registers_found, registers_done, log_message)
       query = <<EOF
-  INSERT INTO reports.daily_import_logs
+  INSERT INTO mastodon.daily_import_logs
     (created_at, table_name, registers_found, registers_done, log_message)
   VALUES
     ('#{date}', '#{table_name}', #{registers_found}, #{registers_done}, '#{log_message}')
