@@ -34,7 +34,10 @@ module Report
     end
 
     def env
-      ENV['RACK_ENV'] || 'development'
+      env = ENV['RACK_ENV']
+      return env unless env.nil?
+
+      ENV['RAILS_ENV'] || 'development'
     end
 
     def stablish_connection(configs)
