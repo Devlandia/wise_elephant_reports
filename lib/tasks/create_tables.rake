@@ -1,5 +1,4 @@
 namespace :db do
-  desc 'Create all report schema tables'
   task :create_tables do
     include Report::MysqlConnection
 
