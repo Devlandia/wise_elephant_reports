@@ -15,7 +15,8 @@
           <th>$ Upsells Sales</th>
           <th>$ Total Sales</th>
           <th>$ Avg. Order Value</th>
-          <th># Hits converted in orders</th>
+          <th># Cnv. Rate</th>
+          <th>$ Value per Hit</th>
         </tr>
       </thead>
 
@@ -37,8 +38,10 @@
             <td><%= number_to_currency values[:total_sales] %></td>
             <td><%= number_to_currency values[:avg_order_value] %></td>
             <td><%= number_to_percentage values[:hits_to_orders], precision: 0 %></td>
+            <td><%= number_to_currency values[:value_per_hit] %></td>
           </tr>
         <% end %>
+
         <% unless @total.blank? %>
           <tr class="success">
             <td>Total</td>
@@ -50,6 +53,7 @@
             <td><%= number_to_currency @total[:total_sales] %></td>
             <td><%= number_to_currency @total[:avg_order_value] %></td>
             <td><%= number_to_percentage @total[:hits_to_orders], precision: 0 %></td>
+            <td><%= number_to_currency @total[:value_per_hit] %></td>
           </tr>
         <% end %>
       </tbody>

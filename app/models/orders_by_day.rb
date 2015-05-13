@@ -110,7 +110,7 @@ class OrdersByDay < ActiveRecord::Base
   end
 
   def self.calculate_avg(item)
-    item[:avg_order_value]  = (item[:total_upsells] + item[:total_sales]) / (item[:upsells] + item[:sales])
+    item[:avg_order_value]  = item[:total_sales] / item[:sales]
 
     item
   end
