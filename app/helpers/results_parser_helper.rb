@@ -11,9 +11,6 @@ module ResultsParser
     response[:hits_to_orders]   = response[:hits] == 0  ? 0 : total_orders / response[:hits]
     response[:value_per_hit]    = response[:hits] == 0  ? 0 : response[:total_sales] / response[:hits]
 
-
-    response.each { |key, value| puts "#{key} => #{value}" }
-
     response
   end
 
