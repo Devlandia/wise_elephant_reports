@@ -19,7 +19,7 @@ gem 'actionview'
 gem 'whenever'
 
 group :development do
-  gem 'mina'
+  gem 'mina',             require: false
   gem 'mina-multistage',  require: false
   gem 'mina-unicorn',     require: false
   gem 'mina-nginx',       require: false
