@@ -1,3 +1,7 @@
+set stages,         %w{ development production }
+set default_stage,  'development'
+
+require 'mina/multistage'     # https://github.com/endoze/mina-multistage
 require 'mina/bundler'
 require 'mina/git'
 require 'mina/rvm'
@@ -8,13 +12,10 @@ require 'mina/whenever'
 # About unicorn integration:
 # It's necessary config tmp/sockets and tmp/pids on shared_paths and
 # create_deploy_dirs.
-set :domain,        '104.130.124.233'
-set :branch,        'master'
 set :unicorn_env,   'production'
 set :application,   'reports'
 set :deploy_to,     "/var/www/#{application}"
 set :repository,    'git@github.com:Devlandia/wise_elephant_reports.git'
-set :user,          'devlandia'
 set :forward_agent, true
 set :port,          '22'
 set :shared_paths,  %w{ log tmp/sockets tmp/pids config/database.yml config/settings.yml }
@@ -52,7 +53,6 @@ task deploy: :environment do
     end
 
     invoke :'nginx:restart'
-    invoke :'whenever:update'
   end
 end
 
