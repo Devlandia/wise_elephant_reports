@@ -53,6 +53,7 @@ task deploy: :environment do
     end
 
     invoke :'nginx:restart'
+    invoke :'whenever:update' if stage == 'production'
   end
 end
 
